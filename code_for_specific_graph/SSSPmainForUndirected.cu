@@ -24,8 +24,10 @@ using namespace std::chrono;
 3rd arg: no. of edges
 4th arg: input SSSP file name
 5th arg: change edges file name
-6th arg: destination vertex
-7th arg: payload (0 or 7)
+6th arg: drone start vertex
+7th arg: destination vertex
+8th arg: payload (0 or 7)
+9th arg: output file name
 ****main commands to run****
 nvcc -o op_main CudaSSSPmain.cu
 ./op_main original_graph_file_name number_of_nodes number_of_edges input_SSSP_file_name change_edge_file_name
@@ -40,17 +42,25 @@ int main(int argc, char* argv[]) {
 	edges = atoi(argv[3]);
 	char* inputSSSPfile = argv[4];
 	char* changeEdgesFile = argv[5];
+	char* outFile = argv[9]; //output file
 
 	//Drone related
 	int currentLoc = 0; //drone's current location. considering single drone single depot.
 	int nextLoc; //drone's current location
-	int destination = atoi(argv[6]); //destination vertex 
-	int payload = atoi(argv[7]); //payload
+	int droneStartLoc = atoi(argv[6]); //drone start vertex
+	int destination = atoi(argv[7]); //destination vertex 
+	int payload = atoi(argv[8]); //payload
 	int cost = 0; //total cost for travel
 	int* traversed;
 	traversed = (int*)calloc(nodes, sizeof(int));
 	int ws[4] = {0,5,10,15};
 	int wd[5] = {0,45,90,135,180};
+	
+	int oldRand = 0;
+	
+	
+	
+	
 
 
 	while (currentLoc != destination && no_of_movement < 20) {
@@ -99,7 +109,8 @@ int main(int argc, char* argv[]) {
 		AdjList.resize(nodes);
 		int* AdjListTracker = (int*)malloc((nodes + 1) * sizeof(int));//we take nodes +1 to store the start ptr of the first row
 		read_graphEdges(AdjList, graphFile, &nodes);
-
+		
+		
 
 		//Read change edges input
 		readin_changes(changeEdgesFile, allChange_Ins, allChange_Del, AdjList, totalInsertion);
@@ -343,8 +354,14 @@ int main(int argc, char* argv[]) {
 
 
 		//****choose and print next effective change edges****
+		srand(time(NULL));
 		int random1 = rand() % 4; //choice for ws
 		int random2 = rand() % 5; //choice for wd
+		if(oldRand == random1)
+		{
+			random1 = (random1 + 1)%4;
+		}
+		oldRand = random1;
 		string ceFileName = "TATA_p" + to_string(payload) + "_ws" + to_string(ws[random1]) +"_wd"+to_string(wd[random2]) + ".txt";
 		//int filename_length = ceFileName.length();
 		cout<<"next changeEdgeFile::"<<ceFileName<<endl;
@@ -434,7 +451,10 @@ int main(int argc, char* argv[]) {
 
 	}
 
-
+	std::ofstream ofs;
+	ofs.open (outFile, std::ofstream::out | std::ofstream::app);
+	ofs << droneStartLoc << " " << destination << " " << cost <<"\n";
+	ofs.close();
 
 	return 0;
 }

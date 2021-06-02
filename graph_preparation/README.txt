@@ -1,6 +1,9 @@
 run findVertexColor to find the Grey vertices(colored 1)
 run generateGraph to generate different graphs with different wind speed, wind direction and payload.
 
+considered battery Budget = 200
+
+
 All these files are working on TataNld.gml taken from: http://www.topology-zoo.org/dataset.html
 
 Please cite if you are using this dataset:
