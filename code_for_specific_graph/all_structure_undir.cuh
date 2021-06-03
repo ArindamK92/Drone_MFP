@@ -132,7 +132,7 @@ void readin_changes(char* myfile, vector<changeEdge>& allChange_Ins, vector<chan
 	auto readCEstopTime = high_resolution_clock::now();//Time calculation ends
 	auto readCEduration = duration_cast<microseconds>(readCEstopTime - readCEstartTime);// duration calculation
 	//cout << "Reading input changed edges data completed. totalInsertion:" << totalInsertion << endl;
-	cout << "Time taken to read input changed edges: " << readCEduration.count() << " microseconds" << endl;
+	//cout << "Time taken to read input changed edges: " << readCEduration.count() << " microseconds" << endl;
 	return;
 }
 
@@ -212,7 +212,7 @@ void read_graphEdges(vector<ColWtList>& AdjList, char* myfile, int* nodes)
 	auto readGraphstopTime = high_resolution_clock::now();//Time calculation ends
 	auto readGraphduration = duration_cast<microseconds>(readGraphstopTime - readGraphstartTime);// duration calculation
 	//cout << "Reading input graph completed" << endl;
-	cout << "Time taken to read input graph: " << readGraphduration.count() << " microseconds" << endl;
+	//cout << "Time taken to read input graph: " << readGraphduration.count() << " microseconds" << endl;
 	return;
 }
 

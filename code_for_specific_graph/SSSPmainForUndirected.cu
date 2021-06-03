@@ -53,10 +53,10 @@ int main(int argc, char* argv[]) {
 	int cost = 0; //total cost for travel
 	int* traversed;
 	traversed = (int*)calloc(nodes, sizeof(int));
-	int ws[4] = {0,5,10,15};
-	int wd[5] = {0,45,90,135,180};
+	int ws[4] = {0,5,10,15}; //keep the choices here//change if taking different dataset
+	int wd[5] = {180,135,90,45,0}; //keep the choices here//change if taking different dataset
 	
-	int oldRand = 0;
+	int oldRand = 0, oldRand2 = 0;
 	
 	
 	
@@ -361,7 +361,12 @@ int main(int argc, char* argv[]) {
 		{
 			random1 = (random1 + 1)%4;
 		}
+		if(oldRand2 == random2)
+		{
+			random2 = (random2 + 1)%5; //adding 1 just to create another number
+		}
 		oldRand = random1;
+		oldRand2 = random2;
 		string ceFileName = "TATA_p" + to_string(payload) + "_ws" + to_string(ws[random1]) +"_wd"+to_string(wd[random2]) + ".txt";
 		//int filename_length = ceFileName.length();
 		cout<<"next changeEdgeFile::"<<ceFileName<<endl;
@@ -384,19 +389,32 @@ int main(int argc, char* argv[]) {
 				//Add change edge in effective change edge only when none of the endpoint is traversed
 				if (traversed[n1] == 0 && traversed[n2] == 0)
 				{
+					int flag1 = 0;
 					//****delete edge (u,n,wt) when drone moves from u to v****
 					for (int j = AdjListTracker[n1]; j < AdjListTracker[n1 + 1]; j++) {
 						int myn = AdjListFull_device[j].col;
 						int mywt = AdjListFull_device[j].wt;
 						if (mywt < 0) { continue; } //if mywt = -1, that means edge was deleted
-						if ((myn == n2) && (mywt != wt))
+						if (myn == n2)
 						{
-							string line = to_string(n1) + " " + to_string(myn) + " " + to_string(mywt) + " " + to_string(0) + "\n"; //delete previous edge
-							myfile3 << line;
-							string line1 = to_string(n1) + " " + to_string(n2) + " " + to_string(wt) + " " + to_string(1) + "\n"; //insert new edge
-							myfile3 << line1;
+							if (mywt != wt) {
+								string line1 = to_string(n1) + " " + to_string(myn) + " " + to_string(mywt) + " " + to_string(0) + "\n"; //delete previous edge
+								myfile3 << line1;
+								//cout << line1 << endl;
+								string line2 = to_string(n1) + " " + to_string(n2) + " " + to_string(wt) + " " + to_string(1) + "\n"; //insert new edge
+								myfile3 << line2;
+								//cout << line2 << endl;
+							}
+							
+							flag1 = 1;
 							break;
 						}
+					}
+					if (flag1 == 0)
+					{
+						string line2 = to_string(n1) + " " + to_string(n2) + " " + to_string(wt) + " " + to_string(1) + "\n"; //insert new edge
+						myfile3 << line2;
+						//cout << line2 << endl;
 					}
 				}
 			}
@@ -409,8 +427,8 @@ int main(int argc, char* argv[]) {
 				if (mywt < 0) { continue; } //if mywt = -1, that means edge was deleted
 				if (myn == nextLoc) { continue; } //skip as nextLoc is v and (u,v) should be 0
 				if (traversed[myn] == 1) { continue; }
-				string line = to_string(currentLoc) + " " + to_string(myn) + " " + to_string(mywt) + " " + to_string(0) + "\n";
-				myfile3 << line;
+				string line4 = to_string(currentLoc) + " " + to_string(myn) + " " + to_string(mywt) + " " + to_string(0) + "\n";
+				myfile3 << line4;
 			}
 			//insert edge (u,v,0) when drone moves from u to v
 			string line1 = to_string(currentLoc) + " " + to_string(nextLoc) + " " + to_string(0) + " " + to_string(1) + "\n";

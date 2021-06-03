@@ -24,6 +24,7 @@ using namespace std::chrono;
 3rd arg: no. of edges
 4th arg: input SSSP file name
 5th arg: change edges file name
+6th arg: destination vertex
 ****main commands to run****
 nvcc -o op_main CudaSSSPmain.cu
 ./op_main original_graph_file_name number_of_nodes number_of_edges input_SSSP_file_name change_edge_file_name
@@ -42,7 +43,7 @@ int main(int argc, char* argv[]) {
 	//Drone related
 	int currentLoc = 0; //drone's current location. considering single drone single depot.
 	int nextLoc; //drone's current location
-	int destination = 5; //destination vertex //taken 5 for testing
+	int destination = atoi(argv[6]); //destination vertex 
 	int cost = 0; //total cost for travel
 	int* traversed;
 	traversed = (int*)calloc(nodes, sizeof(int));
@@ -155,8 +156,7 @@ int main(int argc, char* argv[]) {
 		}
 		auto stopTimeDelEdge = high_resolution_clock::now();//Time calculation ends
 		auto durationDelEdge = duration_cast<microseconds>(stopTimeDelEdge - startTimeDelEdge);// duration calculation
-		cout << "**Time taken for processing deleted edges: "
-			<< float(durationDelEdge.count()) / 1000 << " milliseconds**" << endl;
+		//cout << "**Time taken for processing deleted edges: "	<< float(durationDelEdge.count()) / 1000 << " milliseconds**" << endl;
 
 
 
@@ -171,8 +171,7 @@ int main(int argc, char* argv[]) {
 		}
 		auto stopTimeinsertEdge = high_resolution_clock::now();//Time calculation ends
 		auto durationinsertEdge = duration_cast<microseconds>(stopTimeinsertEdge - startTimeinsertEdge);// duration calculation
-		cout << "**Time taken for processing inserted Edges: "
-			<< float(durationinsertEdge.count()) / 1000 << " milliseconds**" << endl;
+		//cout << "**Time taken for processing inserted Edges: "<< float(durationinsertEdge.count()) / 1000 << " milliseconds**" << endl;
 
 		//new code
 		//int* Q_array = (int*)malloc((nodes) * sizeof(int));
@@ -229,8 +228,7 @@ int main(int argc, char* argv[]) {
 
 		auto stopTimeupdateNeighbors_del = high_resolution_clock::now();//Time calculation ends
 		auto durationupdateNeighbors_del = duration_cast<microseconds>(stopTimeupdateNeighbors_del - startTimeupdateNeighbors_del);// duration calculation
-		cout << "**Time taken for updateNeighbors_del: "
-			<< float(durationupdateNeighbors_del.count()) / 1000 << " milliseconds**" << endl;
+		//cout << "**Time taken for updateNeighbors_del: "	<< float(durationupdateNeighbors_del.count()) / 1000 << " milliseconds**" << endl;
 
 
 
@@ -250,16 +248,14 @@ int main(int argc, char* argv[]) {
 
 		auto stopTimeupdateNeighbors = high_resolution_clock::now();//Time calculation ends
 		auto durationupdateNeighbors = duration_cast<microseconds>(stopTimeupdateNeighbors - startTimeupdateNeighbors);// duration calculation
-		cout << "**Time taken for updateNeighbors: "
-			<< float(durationupdateNeighbors.count()) / 1000 << " milliseconds**" << endl;
+		//cout << "**Time taken for updateNeighbors: "	<< float(durationupdateNeighbors.count()) / 1000 << " milliseconds**" << endl;
 
 
 
 
 
 
-		cout << "****Total Time taken for SSSP update: "
-			<< (float(durationDelEdge.count()) + float(durationupdateNeighbors_del.count()) + float(durationinsertEdge.count()) + float(durationupdateNeighbors.count())) / 1000 << " milliseconds****" << endl;
+		//cout << "****Total Time taken for SSSP update: "	<< (float(durationDelEdge.count()) + float(durationupdateNeighbors_del.count()) + float(durationinsertEdge.count()) + float(durationupdateNeighbors.count())) / 1000 << " milliseconds****" << endl;
 
 
 
@@ -287,7 +283,7 @@ int main(int argc, char* argv[]) {
 		traversed[currentLoc] = 1;
 		int parent = -1;
 		int y = destination;
-		cout << "print path" << endl;
+		cout << "****print path****" << endl;
 		cout << y;
 		while (y != 0) {
 			parent = SSSP[y].Parent;
@@ -309,18 +305,21 @@ int main(int argc, char* argv[]) {
 
 
 		//****print sssp tree in file. format: vertex parent distance****
+		cout << "ptinting sssp: " << endl;
 		ofstream myfile("nextSSSP.txt");
 		if (myfile.is_open())
 		{
 			for (int i = 0; i < nodes; i++) {
 				string line = to_string(i) + " " + to_string(SSSP[i].Parent) + " " + to_string(SSSP[i].Dist) + "\n";
 				myfile << line;
+				cout << line << endl;
 			}
 			myfile.close();
 		}
 		else cout << "Unable to open nextSSSP.txt file";
 
 		//****print current graph in file. format: vertex1 vertex2 weight****
+		cout << "printing current graph :" << endl;
 		ofstream myfile2("nextGraph.txt");
 		int nextEdges = 0;
 		if (myfile2.is_open())
@@ -334,6 +333,7 @@ int main(int argc, char* argv[]) {
 					string line = to_string(i) + " " + to_string(myn) + " " + to_string(mywt) + "\n";
 					myfile2 << line;
 					nextEdges++;
+					cout << line << endl;
 				}
 			}
 			myfile2.close();
@@ -342,22 +342,92 @@ int main(int argc, char* argv[]) {
 
 
 		//****choose and print next effective change edges****
+		//ofstream myfile3("nextEffectiveChangeEdges.txt");
+		//if (myfile3.is_open())
+		//{
+		//	FILE* delE_file;
+		//	char line[128];
+		//	delE_file = fopen("nextChangeEdges.txt", "r"); //select the next Del E***implement a random choice fn***
+		//	while (fgets(line, 128, delE_file) != NULL)
+		//	{
+		//		int n1, n2, wt, inst_status;
+		//		changeEdge cE;
+		//		sscanf(line, "%d %d %d %d", &n1, &n2, &wt, &inst_status);
+		//		//Add change edge in effective change edge only when none of the endpoint is traversed
+		//		if (traversed[n1] == 0 && traversed[n2] == 0)
+		//		{
+		//			string line = to_string(n1) + " " + to_string(n2) + " " + to_string(wt) + " " + to_string(inst_status) + "\n";
+		//			myfile3 << line;
+		//		}
+		//	}
+		//	fclose(delE_file);
+
+		//	//****delete edge (u,n,wt) when drone moves from u to v****
+		//	for (int j = AdjListTracker[currentLoc]; j < AdjListTracker[currentLoc + 1]; j++) {
+		//		int myn = AdjListFull_device[j].col;
+		//		int mywt = AdjListFull_device[j].wt;
+		//		if (mywt < 0) { continue; } //if mywt = -1, that means edge was deleted
+		//		if (myn == nextLoc) { continue; }
+		//		if (traversed[myn] == 1) { continue; }
+		//		string line = to_string(currentLoc) + " " + to_string(myn) + " " + to_string(mywt) + " " + to_string(0) + "\n";
+		//		myfile3 << line;
+		//	}
+		//	//insert edge (u,v,0) when drone moves from u to v
+		//	string line1 = to_string(currentLoc) + " " + to_string(nextLoc) + " " + to_string(0) + " " + to_string(1) + "\n";
+		//	myfile3 << line1;
+
+		//	myfile3.close();
+		//}
+		//else cout << "Unable to open nextEffectiveChangeEdges.txt file";
+
+		cout << "printing next change edges: " << endl;
+		string ceFileName = "cE_delta" + to_string(no_of_movement % 3) + ".txt"; //change the value of 3 if we have different number of snapshots
+		cout << ceFileName << endl;
 		ofstream myfile3("nextEffectiveChangeEdges.txt");
+		const char* char_fileName = ceFileName.c_str();
 		if (myfile3.is_open())
 		{
+
+			//insert new edges
 			FILE* delE_file;
 			char line[128];
-			delE_file = fopen("nextChangeEdges.txt", "r"); //select the next Del E***implement a random choice fn***
+			//delE_file = fopen("nextChangeEdges.txt", "r"); //select the next Del E***implement a random choice fn***
+			delE_file = fopen(char_fileName, "r"); //select the next Del E
 			while (fgets(line, 128, delE_file) != NULL)
 			{
-				int n1, n2, wt, inst_status;
+				int n1, n2, wt;
 				changeEdge cE;
-				sscanf(line, "%d %d %d %d", &n1, &n2, &wt, &inst_status);
+				sscanf(line, "%d %d %d", &n1, &n2, &wt);
 				//Add change edge in effective change edge only when none of the endpoint is traversed
 				if (traversed[n1] == 0 && traversed[n2] == 0)
 				{
-					string line = to_string(n1) + " " + to_string(n2) + " " + to_string(wt) + " " + to_string(inst_status) + "\n";
-					myfile3 << line;
+					int flag1 = 0;
+					//****delete edge (u,n,wt) when drone moves from u to v****
+					for (int j = AdjListTracker[n1]; j < AdjListTracker[n1 + 1]; j++) {
+						int myn = AdjListFull_device[j].col;
+						int mywt = AdjListFull_device[j].wt;
+						if (mywt < 0) { continue; } //if mywt = -1, that means edge was deleted
+						if (myn == n2)
+						{
+							if (mywt != wt) {
+								string line1 = to_string(n1) + " " + to_string(myn) + " " + to_string(mywt) + " " + to_string(0) + "\n"; //delete previous edge
+								myfile3 << line1;
+								cout << line1 << endl;
+								string line2 = to_string(n1) + " " + to_string(n2) + " " + to_string(wt) + " " + to_string(1) + "\n"; //insert new edge
+								myfile3 << line2;
+								cout << line2 << endl;
+							}
+							
+							flag1 = 1;
+							break;
+						}
+					}
+					if (flag1 == 0)
+					{
+						string line2 = to_string(n1) + " " + to_string(n2) + " " + to_string(wt) + " " + to_string(1) + "\n"; //insert new edge
+						myfile3 << line2;
+						cout << line2 << endl;
+					}
 				}
 			}
 			fclose(delE_file);
@@ -367,14 +437,16 @@ int main(int argc, char* argv[]) {
 				int myn = AdjListFull_device[j].col;
 				int mywt = AdjListFull_device[j].wt;
 				if (mywt < 0) { continue; } //if mywt = -1, that means edge was deleted
-				if (myn == nextLoc) { continue; }
+				if (myn == nextLoc) { continue; } //skip as nextLoc is v and (u,v) should be 0
 				if (traversed[myn] == 1) { continue; }
-				string line = to_string(currentLoc) + " " + to_string(myn) + " " + to_string(mywt) + " " + to_string(0) + "\n";
-				myfile3 << line;
+				string line4 = to_string(currentLoc) + " " + to_string(myn) + " " + to_string(mywt) + " " + to_string(0) + "\n";
+				myfile3 << line4;
+				cout << line4 << endl;
 			}
 			//insert edge (u,v,0) when drone moves from u to v
 			string line1 = to_string(currentLoc) + " " + to_string(nextLoc) + " " + to_string(0) + " " + to_string(1) + "\n";
 			myfile3 << line1;
+			cout << line1 << endl;
 
 			myfile3.close();
 		}

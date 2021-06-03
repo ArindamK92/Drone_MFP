@@ -98,8 +98,7 @@ void transfer_data_to_GPU(vector<ColWtList>& AdjList, int*& AdjListTracker, vect
 
 	auto stopTime_transfer = high_resolution_clock::now();//Time calculation ends
 	auto duration_transfer = duration_cast<microseconds>(stopTime_transfer - startTime_transfer);// duration calculation
-	cout << "**Time taken to transfer graph data from CPU to GPU: "
-		<< float(duration_transfer.count()) / 1000 << " milliseconds**" << endl;
+	//cout << "**Time taken to transfer graph data from CPU to GPU: "	<< float(duration_transfer.count()) / 1000 << " milliseconds**" << endl;
 }
 
 void read_and_transfer_input_SSSPtree_to_GPU(char* inputSSSPfile, vector<ColList>& SSSPTreeAdjList, int*& SSSPTreeAdjListTracker, vector<int>& SSSPTreeAdjListFull,
@@ -169,7 +168,7 @@ void read_and_transfer_input_SSSPtree_to_GPU(char* inputSSSPfile, vector<ColList
 	auto readSSSPstopTime = high_resolution_clock::now();//Time calculation ends
 	auto readSSSPduration = duration_cast<microseconds>(readSSSPstopTime - readSSSPstartTime);// duration calculation
 	//cout << "Reading input SSSP tree data completed" << endl;
-	cout << "Time taken to read input input SSSP tree: " << readSSSPduration.count() << " microseconds" << endl;
+	//cout << "Time taken to read input input SSSP tree: " << readSSSPduration.count() << " microseconds" << endl;
 	//set cudaMemAdviseSetPreferredLocation at GPU for SSSP data
 	cudaMemAdvise(SSSP, nodes * sizeof(RT_Vertex), cudaMemAdviseSetPreferredLocation, deviceId);
 
